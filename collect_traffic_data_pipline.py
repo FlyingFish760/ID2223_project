@@ -9,7 +9,7 @@ if LOCAL==False:
     stub = modal.Stub("collect_traffic_data")
     image = modal.Image.debian_slim(python_version='3.9').pip_install(['hopsworks', 'requests'])
 
-    @stub.function(image=image, schedule=modal.Period(minutes=1), secret=modal.Secret.from_name("HOPSWORKS_API_KEY"))
+    @stub.function(image=image, schedule=modal.Period(minutes=5), secret=modal.Secret.from_name("HOPSWORKS_API_KEY"))
     def f():
         g()
 

@@ -44,14 +44,22 @@ def g():
     valid_time = datetime.strptime(data["timeSeries"][0]['validTime'], "%Y-%m-%dT%H:%M:%SZ")
     day = valid_time.day
     hour = valid_time.hour
-    temp  = data["timeSeries"][0]["parameters"][0]["values"] # Air temperature
-    wd =  data["timeSeries"][0]["parameters"][3]["values"]# Wind direction
-    ws = data["timeSeries"][0]["parameters"][4]["values"] # Wind Speed
-    prec1h = data["timeSeries"][0]["parameters"][6]["values"] # Precipation last hour
+
+    # temp  = data["timeSeries"][0]["parameters"][0]["values"] # Air temperature
+    # wd =  data["timeSeries"][0]["parameters"][3]["values"]# Wind direction
+    # ws = data["timeSeries"][0]["parameters"][4]["values"] # Wind Speed
+    # prec1h = data["timeSeries"][0]["parameters"][6]["values"] # Precipation last hour
     for parameter in data["timeSeries"][0]["parameters"]:
+        if parameter['name'] == 't':
+            temp = parameter["values"] # Air temperature
+        if parameter['name'] == 'wd':
+            wd = parameter["values"] # Wind direction
+        if parameter['name'] == 'ws':
+            ws = parameter["values"] # Wind Speed
+        if parameter['name'] == 'prec1h':
+            prec1h = parameter["values"] # Precipation last hour
         if parameter['name'] == 'frsn1h':
             frsn1h = parameter["values"] # Snow precipation last hour
-    for parameter in data["timeSeries"][0]["parameters"]:
         if parameter['name'] == 'vis':
             vis = parameter["values"] # Horizontal visibility
     data_df = pd.DataFrame({
