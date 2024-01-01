@@ -9,7 +9,7 @@ if LOCAL==False:
     stub = modal.Stub("collect_traffic_data")
     image = modal.Image.debian_slim(python_version='3.9').pip_install(['hopsworks', 'requests'])
 
-    @stub.function(image=image, schedule=modal.Period(minutes=5), secret=modal.Secret.from_name("HOPSWORKS_API_KEY"))
+    @stub.function(image=image, schedule=modal.Period(hours=1), secret=modal.Secret.from_name("HOPSWORKS_API_KEY"))
     def f():
         g()
 
@@ -67,18 +67,21 @@ def g():
     traffic_flow_data_df['weekend'] = [True] if current_datetime.weekday()>=5 else [False]
     traffic_flow_data_df['day'] = [current_datetime.day]
     traffic_flow_data_df['hour'] = [current_datetime.hour]
-    traffic_flow_data_df['minute'] = [current_datetime.minute]
+    # traffic_flow_data_df['minute'] = [current_datetime.minute]
     print(traffic_flow_data_df)
 
     # push data to hopsworks
-    keys = ['weekend', 'day', 'hour', 'minute']
+    keys = ['weekend', 'day', 'hour']
     fg = fs.get_or_create_feature_group(
         name='traffic_flow_data',
-        version=1,
+        version=3,
         primary_key=keys,
         description='Traffic flow data'
     )
     fg.insert(traffic_flow_data_df)
+
+    # log out
+    hopsworks.logout()
 
 
 if __name__=='__main__':

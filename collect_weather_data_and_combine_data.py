@@ -84,6 +84,9 @@ def g():
     )
     fg.insert(data_df)
 
+    # log out
+    hopsworks.logout()
+
 
     # '''Combine weather and traffic flow data and save the data to hopsworks'''
     # # Retrieve traffic flow data
