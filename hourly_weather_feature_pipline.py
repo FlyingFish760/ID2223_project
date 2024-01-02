@@ -76,12 +76,18 @@ def g():
 
     # push data to hopsworks
     keys = data_df.keys()
-    fg = fs.get_or_create_feature_group(
-        name='weather_data',
-        version=1,
-        primary_key=keys,
-        description='Weather_data'
-    )
+    try:
+        fg = fs.get_feature_group(
+            name='hourly_weather_features',
+            version=1
+        )
+    except:
+        fg = fs.create_feature_group(
+            name='hourly_weather_features',
+            version=1,
+            primary_key=keys,
+            description='Hourly weather features'
+        )
     fg.insert(data_df)
 
     # log out

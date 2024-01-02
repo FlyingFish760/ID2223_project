@@ -2,7 +2,7 @@ import modal
 import pandas as pd
 
 tomtom_api_key = '95GWSfDPOA0Nr9v0To26HEsAucy2yiR7'
-LOCAL = False
+LOCAL = True
 
 
 if LOCAL==False:
@@ -72,12 +72,19 @@ def g():
 
     # push data to hopsworks
     keys = ['weekend', 'day', 'hour']
-    fg = fs.get_or_create_feature_group(
-        name='traffic_flow_data',
-        version=3,
-        primary_key=keys,
-        description='Traffic flow data'
-    )
+    try:
+        fg = fs.get_feature_group(
+            name='hourly_traffic_features',
+            version=1
+        )
+    except:
+        fg = fs.create_feature_group(
+            name='hourly_traffic_features',
+            version=1,
+            primary_key=keys,
+            description='Hourly traffic features'
+        )
+    
     fg.insert(traffic_flow_data_df)
 
     # log out
