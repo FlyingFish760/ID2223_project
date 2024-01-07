@@ -45,10 +45,6 @@ def g():
     day = valid_time.day
     hour = valid_time.hour
 
-    # temp  = data["timeSeries"][0]["parameters"][0]["values"] # Air temperature
-    # wd =  data["timeSeries"][0]["parameters"][3]["values"]# Wind direction
-    # ws = data["timeSeries"][0]["parameters"][4]["values"] # Wind Speed
-    # prec1h = data["timeSeries"][0]["parameters"][6]["values"] # Precipation last hour
     for parameter in data["timeSeries"][0]["parameters"]:
         if parameter['name'] == 't':
             temp = parameter["values"] # Air temperature
@@ -93,24 +89,6 @@ def g():
     # log out
     hopsworks.logout()
 
-
-    # '''Combine weather and traffic flow data and save the data to hopsworks'''
-    # # Retrieve traffic flow data
-    # traffic_fg = fs.get_feature_group(name='test', version=3)
-    # weather_fg = fs.get_feature_group(name='test_weather', version=2)
-    
-    # # Combine both data and upload
-    # query = traffic_fg.select_all().join(weather_fg.select_all(), on=['day', 'hour'])
-    # # query = traffic_fg.select_all()
-
-    # # keys = ['weekend', 'day', 'hour', 'minute', 'temp','wd','ws','prec1h','frsn1h','vis']
-    # feature_view = fs.get_or_create_feature_view(
-    #     name='test_combined',
-    #     version=2,
-    #     description="test combined data",
-    #     labels=["current_speed"],
-    #     query=query
-    # )
 
 
 
