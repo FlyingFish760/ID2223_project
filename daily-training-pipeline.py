@@ -1,5 +1,6 @@
 import hopsworks
 import pandas as pd
+import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.neighbors import KNeighborsRegressor
@@ -21,10 +22,9 @@ if LOCAL == False:
 
    stub = modal.Stub("model_training")
    image = modal.Image.debian_slim(python_version='3.9').pip_install(['hopsworks', 'requests',"datetime", "datasets","scikit-learn","matplotlib", "seaborn","xgboost"])
-   @stub.function(image=image, schedule=modal.Period(hours=1), secret=modal.Secret.from_name("HOPSWORKS_API_KEY"))
+   @stub.function(image=image, schedule=modal.Period(hours=2), secret=modal.Secret.from_name("HOPSWORKS_API_KEY"))
    def f():
        g()
-
 
 # Function to train models and evaluate performance
 def train_and_evaluate_models(X_train, y_train, X_test, y_test):
@@ -42,7 +42,7 @@ def train_and_evaluate_models(X_train, y_train, X_test, y_test):
       y_pred = model.predict(X_test)
       rmse = mean_squared_error(y_test, y_pred, squared=False)
       r2 = r2_score(y_test, y_pred)
-      results[name] = {'RMSE': rmse, 'R2 Score': r2}
+      results[name] = {'model': model, 'RMSE': rmse, 'R2 Score': r2}
 
    return results
 
@@ -55,7 +55,6 @@ def find_best_model(results):
 
 
 def g():
-
    # Load data and create a feature view
    project = hopsworks.login()
    fs = project.get_feature_store()
@@ -85,16 +84,12 @@ def g():
    historical_dataset = traffic_train.merge(weather_train, on=['day', 'hour'])
    # Check for missing values and fill them
    historical_dataset = historical_dataset.ffill()
-   # Fill any remaining missing values with mean
-   historical_dataset = historical_dataset.fillna(historical_dataset.mean())
    # Merge historical dataset with real-time data
    train_data = pd.concat([data, historical_dataset])
 
    # Extract features and target
    X_train = train_data.drop(['free_flow_speed', 'weekend', 'confidence', 'day', 'current_speed'], axis=1)
    y_train = train_data['current_speed']
-
-   print(X_train)
 
    # Load test data from CSV files
    traffic_testset_path = 'https://raw.githubusercontent.com/FlyingFish760/ID2223_project/main/historical_dataset/traffic_testset.csv'
@@ -120,10 +115,11 @@ def g():
    print("Model Performances:")
    for name, metrics in results.items():
       print(f"{name}: RMSE  {metrics['RMSE']:.2f}, R2 Score  {metrics['R2 Score']:.2f}")
-
    # Find the best model and update it in the Model Registry
    best_model, best_model_name = find_best_model(results)
 
+   # Save the best model along with its name
+   model_data = {'name': best_model_name, 'model': best_model['model']}
 
    # Upload the best model to the Hopsworks Model Registry
    mr = project.get_model_registry()
@@ -135,7 +131,32 @@ def g():
 
    # Save the best model
    best_model_path = model_dir + '/best_model.joblib'
-   joblib.dump(best_model, best_model_path)
+   joblib.dump(model_data, best_model_path)
+
+   # model = joblib.load(model_dir + '/best_model.joblib')
+   # print(model)
+   # print(type(model['model']))
+
+   # Plot and save the training progress
+   for name, model in results.items():
+      plt.plot(y_test, label='True Values')
+      plt.plot(model['model'].predict(X_test), label='Predicted Values')
+      plt.title(f'{name} - Model Evaluation')
+      plt.xlabel('Sample Index')
+      plt.ylabel('Speed')
+      plt.legend()
+      plot_path = os.path.join(model_dir, f'{name}_plot.png')
+      plt.savefig(plot_path)
+      plt.close()
+
+      # Upload the plot to Hopsworks Dataset API
+      dataset_path = f"/Projects/han760/Models/traffic_weather_model/{name}_plot.png"
+      dataset_api = project.get_dataset_api()
+
+      # Check if the dataset exists, if not, upload the plot
+      if not dataset_api.exists(dataset_path):
+         dataset_api.upload(plot_path, dataset_path, overwrite=True)
+
 
    # Specify the schema of the model's input/output
    input_schema = Schema(X_train)  # Replace with the actual input schema
@@ -150,7 +171,7 @@ def g():
          'R2 Score': float(results[best_model_name]['R2 Score'])
       },
       model_schema=model_schema,
-      description="Traffic Flow Predictor"
+      description=f"Traffic Flow Predictor - Best Model: {best_model_name}"
    )
 
    # Upload the model to the model registry
