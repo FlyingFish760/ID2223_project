@@ -1,6 +1,6 @@
 # Real-time traffic flow prediction
 
-## Contributors: Jingyuan Han （19990320T490） & Kaidi Xu; 
+## Contributors: Jingyuan Han  & Kaidi Xu; 
 
 ## About
 This project aims to build a real-time traffic flow predictor for the location [59°20'55.7"N 18°04'22.9"E](https://www.google.com/maps/place/59%C2%B020'55.7%22N+18%C2%B004'22.9%22E/@59.34881,18.0704451,17z/data=!3m1!4b1!4m4!3m3!8m2!3d59.34881!4d18.07302?authuser=0&entry=ttu) at KTH. Prediction of traffic flow at specific hour could be made based on the given time and weather conditions via [Hugging face](https://huggingface.co/spaces/Han760/Traffic_flow_prediction). The prediction model is also trained hourly using the real-time weather and traffic flow data, in order to improve the model performance consistently.
