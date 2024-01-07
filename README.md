@@ -28,6 +28,10 @@ Here we used the follow data:
 * Horizontal visibility
 
 ## Training pipline
+In the [training pipeline](https://github.com/FlyingFish760/ID2223_project/blob/main/daily-training-pipeline.py), four ML models have been trained: K-Nearest Neighbors (KNN), Linear Regression, AdaBoost Regression, and XGBoost with RMSE and R2 Score to evaluate the performance of each model. The training pipeline is deployed as a scheduled job that runs every two hours on Modal, automating the model training and evaluation process. Then the best-performing model is identified based on performance and will be registered and uploaded to Hopsworks after every training. Also, plots comparing true values with predicted values for each model will also be uploads to Hopsworks using the Dataset API.
+
+The training data is a combination of historical dataset and real-time collected traffic and weather data obtained from Hopsworks feature groups ("hourly_traffic_feature_pipline.py", "hourly_weather_feature_pipline.py"). The test data is sourced from combining traffic and weather data collected on a certain date for evaluation. 
+
 
 ## Inference pipline
 The inference pipline could make real-time prediction of the traffic flow given a specific hour and weather conditions. Here the best model (based on the performance evaluation so far) was used, which was retrieved from the hopsworks model registry. The process is done via "gradio" interface built on [hugging face](https://huggingface.co/). Every prediction is also uploaded to the hopsworks. On another hugging face interface one could easily get the most recent 5 predictions. 
